@@ -110,14 +110,26 @@ export class MomentoService {
     const pollTopic = async () => {
       while (!this.subscriptionAbortController?.signal.aborted) {
         try {
+          // Create a timeout controller for 5 minutes
+          const timeoutController = new AbortController();
+          const timeoutId = setTimeout(() => timeoutController.abort(), 5 * 60 * 1000);
+
+          // Combine the subscription abort signal with timeout
+          const combinedSignal = AbortSignal.any([
+            this.subscriptionAbortController?.signal,
+            timeoutController.signal
+          ].filter(Boolean) as AbortSignal[]);
+
           const response = await fetch(`${this.config.endpoint}/topics/${this.config.cacheName}/${topicName}`, {
             method: 'GET',
             headers: {
               'Authorization': this.config.apiKey,
               'Accept': 'application/json',
             },
-            signal: this.subscriptionAbortController?.signal,
+            signal: combinedSignal,
           });
+
+          clearTimeout(timeoutId);
 
           if (!response.ok) {
             throw new Error(`Subscription failed for ${topicName}: ${response.status} ${response.statusText}`);

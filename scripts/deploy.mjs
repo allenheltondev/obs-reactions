@@ -78,7 +78,7 @@ function deployInfrastructure() {
       log('📋 No samconfig.toml found, using defaults for CI...');
       const stackName = 'obs-reactions';
       const region = 'us-west-2';
-      execCommand(`sam deploy --stack-name ${stackName} --region ${region} --capabilities CAPABILITY_IAM --no-confirm-changeset`);
+      execCommand(`sam deploy --stack-name ${stackName} --region ${region} --capabilities CAPABILITY_IAM --no-confirm-changeset --no-fail-on-empty-changeset`);
     } else {
       log('📋 No samconfig.toml found, running guided setup...');
       execCommand('sam deploy --guided');
