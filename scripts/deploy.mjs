@@ -108,6 +108,10 @@ function buildParameterOverrides() {
     overrides.push(`SubDomain=${process.env.DNS_SUBDOMAIN}`);
   }
 
+  if (process.env.DNS_CERTIFICATE_ARN) {
+    overrides.push(`CertificateArn=${process.env.DNS_CERTIFICATE_ARN}`);
+  }
+
   return overrides.length > 0 ? overrides.join(' ') : null;
 }
 

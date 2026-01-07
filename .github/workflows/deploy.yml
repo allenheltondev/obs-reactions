@@ -56,3 +56,4 @@ jobs:
         DNS_HOSTED_ZONE_ID: ${{ vars.DNS_HOSTED_ZONE_ID }}
         DNS_DOMAIN_NAME: ${{ vars.DNS_DOMAIN_NAME }}
         DNS_SUBDOMAIN: ${{ vars.DNS_SUBDOMAIN }}
+        DNS_CERTIFICATE_ARN: ${{ vars.DNS_CERTIFICATE_ARN }}

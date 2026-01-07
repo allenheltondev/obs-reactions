@@ -18,11 +18,17 @@ Parameters:
     Description: Subdomain for the application (e.g., app)
     Default: ''
 
+  CertificateArn:
+    Type: String
+    Description: ACM Certificate ARN in us-east-1 for CloudFront (required for custom domain)
+    Default: ''
+
 Conditions:
   HasCustomDomain: !And
     - !Not [!Equals [!Ref HostedZoneId, '']]
     - !Not [!Equals [!Ref DomainName, '']]
     - !Not [!Equals [!Ref SubDomain, '']]
+    - !Not [!Equals [!Ref CertificateArn, '']]
 
 Resources:
   WebsiteBucket:
@@ -49,16 +55,6 @@ Resources:
         SigningBehavior: always
         SigningProtocol: sigv4
 
-  SSLCertificate:
-    Type: AWS::CertificateManager::Certificate
-    Condition: HasCustomDomain
-    Properties:
-      DomainName: !Sub '${SubDomain}.${DomainName}'
-      ValidationMethod: DNS
-      DomainValidationOptions:
-        - DomainName: !Sub '${SubDomain}.${DomainName}'
-          HostedZoneId: !Ref HostedZoneId
-
   CloudFrontDistribution:
     Type: AWS::CloudFront::Distribution
     Properties:
@@ -69,7 +65,7 @@ Resources:
           - !Ref AWS::NoValue
         ViewerCertificate: !If
           - HasCustomDomain
-          - AcmCertificateArn: !Ref SSLCertificate
+          - AcmCertificateArn: !Ref CertificateArn
             SslSupportMethod: sni-only
             MinimumProtocolVersion: TLSv1.2_2021
           - CloudFrontDefaultCertificate: true
@@ -157,10 +153,3 @@ Outputs:
     Value: !Sub '${SubDomain}.${DomainName}'
     Export:
       Name: !Sub '${AWS::StackName}-CustomDomainName'
-
-  SSLCertificateArn:
-    Condition: HasCustomDomain
-    Description: SSL Certificate ARN
-    Value: !Ref SSLCertificate
-    Export:
-      Name: !Sub '${AWS::StackName}-SSLCertificateArn'

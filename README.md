@@ -149,6 +149,65 @@ The deployment creates:
 - CloudFront distribution for global delivery
 - Proper security configurations
 
+#### Custom Domain Setup (Optional)
+
+To use a custom domain with your deployment:
+
+**CRITICAL**: CloudFront requires SSL certificates to be in the `us-east-1` region, regardless of where your application is deployed.
+
+##### Step 1: Create SSL Certificate in us-east-1
+
+###### Option A: AWS Console (Recommended)
+1. Switch to the **us-east-1** region in AWS Console
+2. Go to Certificate Manager (ACM)
+3. Click "Request a certificate"
+4. Choose "Request a public certificate"
+5. Enter your domain: `your-subdomain.your-domain.com`
+6. Choose "DNS validation"
+7. Click "Request"
+8. Follow the DNS validation steps (add CNAME records to your Route53 hosted zone)
+9. Wait for validation to complete
+10. Copy the certificate ARN (starts with `arn:aws:acm:us-east-1:...`)
+
+###### Option B: AWS CLI
+```bash
+# Switch to us-east-1 region
+aws configure set region us-east-1
+
+# Request certificate
+aws acm request-certificate \
+  --domain-name your-subdomain.your-domain.com \
+  --validation-method DNS \
+  --query 'CertificateArn' \
+  --output text
+
+# Get validation records (replace CERTIFICATE_ARN with output from above)
+aws acm describe-certificate \
+  --certificate-arn CERTIFICATE_ARN \
+  --query 'Certificate.DomainValidationOptions[0].ResourceRecord'
+
+# Add the CNAME record to your Route53 hosted zone, then wait for validation
+```
+
+##### Step 2: Configure GitHub Variables (for CI/CD)
+In your GitHub repository settings:
+
+1. Go to Settings → Secrets and variables → Actions
+2. Add Repository Variables:
+   - `DNS_HOSTED_ZONE_ID`: Your Route53 hosted zone ID
+   - `DNS_DOMAIN_NAME`: Your root domain (e.g., `example.com`)
+   - `DNS_SUBDOMAIN`: Your subdomain (e.g., `app`)
+   - `DNS_CERTIFICATE_ARN`: Your ACM certificate ARN from us-east-1
+
+##### Step 3: Deploy with Custom Domain
+Your next deployment will automatically configure the custom domain.
+
+##### Local Development with Custom Domain
+Update your `samconfig.toml`:
+```toml
+parameter_overrides = "Environment=prod HostedZoneId=Z1234567890ABC DomainName=example.com SubDomain=app CertificateArn=arn:aws:acm:us-east-1:123456789012:certificate/12345678-1234-1234-1234-123456789012"
+```
+
 ### Manual Deployment
 
 For other hosting providers:
