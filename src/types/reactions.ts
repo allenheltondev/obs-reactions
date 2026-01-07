@@ -1,6 +1,7 @@
 export interface Reaction {
   emojiType: string;
   senderId: string;
+  topicName?: string;
 }
 
 export interface ReactionAnimation {

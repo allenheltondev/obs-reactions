@@ -1,6 +1,6 @@
 export interface EnvironmentConfig {
   VITE_MOMENTO_API_KEY: string;
-  VITE_MOMENTO_TOPICS_URL: string;
+  VITE_MOMENTO_ENDPOINT: string;
   VITE_MOMENTO_CACHE_NAME: string;
   VITE_EVENT_NAME: string;
   VITE_PRIMARY_COLOR: string;
@@ -12,7 +12,7 @@ export interface EnvironmentConfig {
 export const getEnvironmentConfig = (): EnvironmentConfig => {
   const config = {
     VITE_MOMENTO_API_KEY: import.meta.env.VITE_MOMENTO_API_KEY,
-    VITE_MOMENTO_TOPICS_URL: import.meta.env.VITE_MOMENTO_TOPICS_URL,
+    VITE_MOMENTO_ENDPOINT: import.meta.env.VITE_MOMENTO_ENDPOINT,
     VITE_MOMENTO_CACHE_NAME: import.meta.env.VITE_MOMENTO_CACHE_NAME,
     VITE_EVENT_NAME: import.meta.env.VITE_EVENT_NAME || 'Live Event',
     VITE_PRIMARY_COLOR: import.meta.env.VITE_PRIMARY_COLOR || '#15381F',
@@ -22,7 +22,7 @@ export const getEnvironmentConfig = (): EnvironmentConfig => {
   };
 
   // Validate that all required environment variables are present
-  const requiredVars = ['VITE_MOMENTO_API_KEY', 'VITE_MOMENTO_TOPICS_URL', 'VITE_MOMENTO_CACHE_NAME'];
+  const requiredVars = ['VITE_MOMENTO_API_KEY', 'VITE_MOMENTO_ENDPOINT', 'VITE_MOMENTO_CACHE_NAME'];
   const missingVars = requiredVars
     .filter(key => !config[key as keyof EnvironmentConfig])
     .map(key => key);

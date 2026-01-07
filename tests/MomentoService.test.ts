@@ -9,7 +9,7 @@ const mockFetch = vi.fn();
 vi.mock('../src/types/environment', () => ({
   getEnvironmentConfig: () => ({
     VITE_MOMENTO_API_KEY: 'test-api-key',
-    VITE_MOMENTO_TOPICS_URL: 'https://test-momento-url.com',
+    VITE_MOMENTO_ENDPOINT: 'https://test-momento-url.com',
     VITE_MOMENTO_CACHE_NAME: 'test-cache'
   })
 }));

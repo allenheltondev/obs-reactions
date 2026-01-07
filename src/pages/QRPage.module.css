@@ -39,9 +39,9 @@
 
 .qrContainer {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  padding: 2rem;
+  padding: 2rem 2rem 1rem 2rem;
   background: rgba(255, 255, 255, 0.95);
   border-radius: 24px;
   border: 2px solid rgba(255, 255, 255, 0.3);
@@ -54,6 +54,36 @@
   height: auto;
   border-radius: 12px;
   display: block;
+  margin-bottom: 1rem;
+}
+
+.emojiRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.25rem;
+  width: 100%;
+}
+
+.emojiStat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.125rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.emoji {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.count {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--primary);
+  min-height: 1rem;
 }
 
 .loading {
@@ -98,14 +128,50 @@
   }
 
   .qrContainer {
-    padding: 1.5rem;
+    padding: 1.5rem 1.5rem 1rem 1.5rem;
+  }
+
+  .qrCode {
+    margin-bottom: 0.75rem;
+  }
+
+  .emojiRow {
+    gap: 0.125rem;
+  }
+
+  .emojiStat {
+    gap: 0.0625rem;
+  }
+
+  .emoji {
+    font-size: 1rem;
+  }
+
+  .count {
+    font-size: 0.75rem;
   }
 }
 
 /* Tablet styles */
 @media (min-width: 768px) {
   .qrContainer {
-    padding: 2.5rem;
+    padding: 2rem 2rem 1rem 2rem;
+  }
+
+  .qrCode {
+    margin-bottom: 1rem;
+  }
+
+  .emojiRow {
+    gap: 0.5rem;
+  }
+
+  .emoji {
+    font-size: 1.5rem;
+  }
+
+  .count {
+    font-size: 1rem;
   }
 }
 
@@ -116,7 +182,23 @@
   }
 
   .qrContainer {
-    padding: 3rem;
+    padding: 2.5rem 2.5rem 1.5rem 2.5rem;
+  }
+
+  .qrCode {
+    margin-bottom: 1.25rem;
+  }
+
+  .emojiRow {
+    gap: 0.75rem;
+  }
+
+  .emoji {
+    font-size: 1.75rem;
+  }
+
+  .count {
+    font-size: 1.125rem;
   }
 }
 

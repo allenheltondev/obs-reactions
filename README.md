@@ -15,6 +15,8 @@ Reactions appear instantly on the overlay with smooth animations, and built-in s
 ## Features
 
 - **Real-time Reactions**: Instant emoji animations using Momento Topics messaging
+- **Live Reaction Counts**: QR page displays running totals of all reactions sent
+- **Reset Functionality**: Manually reset reaction counts via Momento Topics
 - **OBS Integration**: Transparent overlay perfect for streaming software
 - **Mobile Optimized**: Touch-friendly control interface for viewers
 - **Spam Prevention**: 3-second cooldown per user prevents overwhelming animations
@@ -34,7 +36,7 @@ cp .env.example .env
 Edit `.env` with your Momento configuration:
 ```
 VITE_MOMENTO_API_KEY=your_momento_api_key_here
-VITE_MOMENTO_TOPICS_URL=your_momento_topics_url_here
+VITE_MOMENTO_ENDPOINT=your_momento_endpoint_here
 ```
 
 ### 2. Development
@@ -61,6 +63,13 @@ The QR page generates a scannable QR code that links directly to your control pa
 - Displaying on screen for viewers to scan
 - Sharing the reaction interface without typing URLs
 - Quick mobile access during live streams
+
+**Live Reaction Counts**: The QR page also displays real-time counts of all reactions sent during the session, showing viewers the total engagement for each emoji type.
+
+**Resetting Counts**: You can reset all reaction counts to zero by publishing any message to the "reset" topic in Momento. This is useful for:
+- Starting fresh for new stream segments
+- Clearing counts between different activities
+- Resetting after testing or setup
 
 ## OBS Setup Guide
 
@@ -174,9 +183,11 @@ src/
 1. **Session Creation**: Each stream gets a unique session ID in the URL
 2. **QR Code Generation**: Display the QR page on stream for viewers to scan and access reactions
 3. **Real-time Messaging**: Momento Topics handles instant communication between pages
-4. **Animation System**: CSS animations with JavaScript positioning create smooth effects
-5. **Spam Prevention**: Local storage tracks cooldowns per user to prevent abuse
-6. **OBS Integration**: Transparent overlay page works seamlessly with streaming software
+4. **Live Counting**: QR page tracks and displays running totals of all reactions
+5. **Animation System**: CSS animations with JavaScript positioning create smooth effects
+6. **Spam Prevention**: Local storage tracks cooldowns per user to prevent abuse
+7. **OBS Integration**: Transparent overlay page works seamlessly with streaming software
+8. **Reset Control**: Publish to "reset" topic to clear all reaction counts instantly
 
 ## Configuration
 
@@ -185,7 +196,7 @@ src/
 | Variable | Description | Required | Example |
 |----------|-------------|----------|---------|
 | `VITE_MOMENTO_API_KEY` | Momento authentication token | Yes | `eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9...` |
-| `VITE_MOMENTO_TOPICS_URL` | Momento Topics service endpoint | Yes | `https://api.cache.cell-4-us-west-2-1.prod.a.momentohq.com` |
+| `VITE_MOMENTO_ENDPOINT` | Momento service endpoint | Yes | `https://api.cache.cell-4-us-west-2-1.prod.a.momentohq.com` |
 | `VITE_MOMENTO_CACHE_NAME` | Momento cache name for your project | Yes | `my-reactions-cache` |
 | `VITE_EVENT_NAME` | Display name for your event/stream | No | `My Awesome Stream` |
 | `VITE_PRIMARY_COLOR` | Primary brand color (hex) | No | `#15381F` |
@@ -197,7 +208,7 @@ src/
 1. Sign up at [Momento Console](https://console.gomomento.com/)
 2. Create a new cache for your project
 3. Generate an API key with Topics permissions
-4. Copy the API key and Topics URL to your `.env` file
+4. Copy the API key and endpoint URL to your `.env` file
 
 #### Complete .env.example
 
@@ -205,7 +216,7 @@ src/
 # Momento Configuration
 # Get these values from your Momento Console (https://console.gomomento.com/)
 VITE_MOMENTO_API_KEY=your_momento_api_key_here
-VITE_MOMENTO_TOPICS_URL=your_momento_topics_url_here
+VITE_MOMENTO_ENDPOINT=your_momento_endpoint_here
 VITE_MOMENTO_CACHE_NAME=your_cache_name_here
 
 # Branding (Optional)
