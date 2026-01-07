@@ -28,7 +28,7 @@ jobs:
     - name: Create environment file
       run: |
         echo "VITE_MOMENTO_API_KEY=${{ secrets.MOMENTO_API_KEY }}" >> .env
-        echo "VITE_MOMENTO_TOPICS_URL=${{ vars.MOMENTO_TOPICS_URL }}" >> .env
+        echo "VITE_MOMENTO_ENDPOINT=${{ vars.MOMENTO_ENDPOINT }}" >> .env
         echo "VITE_MOMENTO_CACHE_NAME=${{ vars.MOMENTO_CACHE_NAME }}" >> .env
         echo "VITE_EVENT_NAME=${{ vars.EVENT_NAME || 'Live Event' }}" >> .env
         echo "VITE_PRIMARY_COLOR=${{ vars.PRIMARY_COLOR || '#15381F' }}" >> .env
