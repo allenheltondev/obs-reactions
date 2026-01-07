@@ -51,4 +51,4 @@ jobs:
         use-installer: true
 
     - name: Deploy to AWS
-      run: npm run deploy
+      run: node scripts/deploy.mjs --ci

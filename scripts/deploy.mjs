@@ -9,6 +9,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const projectRoot = join(__dirname, '..');
 
+// Check for CI flag
+const isCI = process.argv.includes('--ci');
+
 function log(message, color = '\x1b[32m') {
   console.log(`${color}%s\x1b[0m`, message);
 }
@@ -65,10 +68,21 @@ function deployInfrastructure() {
 
   if (samConfigExists) {
     log('📋 Using existing samconfig.toml...');
-    execCommand('sam deploy');
+    if (isCI) {
+      execCommand('sam deploy --no-confirm-changeset');
+    } else {
+      execCommand('sam deploy');
+    }
   } else {
-    log('📋 No samconfig.toml found, running guided setup...');
-    execCommand('sam deploy --guided');
+    if (isCI) {
+      log('📋 No samconfig.toml found, using defaults for CI...');
+      const stackName = 'obs-reactions';
+      const region = 'us-west-2';
+      execCommand(`sam deploy --stack-name ${stackName} --region ${region} --capabilities CAPABILITY_IAM --no-confirm-changeset`);
+    } else {
+      log('📋 No samconfig.toml found, running guided setup...');
+      execCommand('sam deploy --guided');
+    }
   }
 }
 
@@ -109,6 +123,10 @@ function getRegion() {
 }
 
 function getProfile() {
+  if (isCI) {
+    return null;
+  }
+
   const samConfigPath = join(projectRoot, 'samconfig.toml');
 
   if (existsSync(samConfigPath)) {
