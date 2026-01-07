@@ -2,6 +2,28 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: 'OBS Reactions - React app deployed to S3 and CloudFront'
 
+Parameters:
+  HostedZoneId:
+    Type: String
+    Description: Route53 Hosted Zone ID for the domain
+    Default: ''
+
+  DomainName:
+    Type: String
+    Description: Root domain name (e.g., example.com)
+    Default: ''
+
+  SubDomain:
+    Type: String
+    Description: Subdomain for the application (e.g., app)
+    Default: ''
+
+Conditions:
+  HasCustomDomain: !And
+    - !Not [!Equals [!Ref HostedZoneId, '']]
+    - !Not [!Equals [!Ref DomainName, '']]
+    - !Not [!Equals [!Ref SubDomain, '']]
+
 Resources:
   WebsiteBucket:
     Type: AWS::S3::Bucket
@@ -27,12 +49,30 @@ Resources:
         SigningBehavior: always
         SigningProtocol: sigv4
 
+  SSLCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Condition: HasCustomDomain
+    Properties:
+      DomainName: !Sub '${SubDomain}.${DomainName}'
+      ValidationMethod: DNS
+      DomainValidationOptions:
+        - DomainName: !Sub '${SubDomain}.${DomainName}'
+          HostedZoneId: !Ref HostedZoneId
+
   CloudFrontDistribution:
     Type: AWS::CloudFront::Distribution
     Properties:
       DistributionConfig:
-        ViewerCertificate:
-          CloudFrontDefaultCertificate: true
+        Aliases: !If
+          - HasCustomDomain
+          - [!Sub '${SubDomain}.${DomainName}']
+          - !Ref AWS::NoValue
+        ViewerCertificate: !If
+          - HasCustomDomain
+          - AcmCertificateArn: !Ref SSLCertificate
+            SslSupportMethod: sni-only
+            MinimumProtocolVersion: TLSv1.2_2021
+          - CloudFrontDefaultCertificate: true
         Origins:
           - Id: S3Origin
             DomainName: !GetAtt WebsiteBucket.RegionalDomainName
@@ -74,6 +114,17 @@ Resources:
               StringEquals:
                 'AWS:SourceArn': !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}'
 
+  DNSRecord:
+    Type: AWS::Route53::RecordSet
+    Condition: HasCustomDomain
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Sub '${SubDomain}.${DomainName}'
+      Type: A
+      AliasTarget:
+        DNSName: !GetAtt CloudFrontDistribution.DomainName
+        HostedZoneId: Z2FDTNDATAQYW2  # CloudFront hosted zone ID (global)
+
 Outputs:
   WebsiteBucketName:
     Description: Name of the S3 bucket
@@ -95,4 +146,21 @@ Outputs:
 
   WebsiteURL:
     Description: Website URL
-    Value: !Sub 'https://${CloudFrontDistribution.DomainName}'
+    Value: !If
+      - HasCustomDomain
+      - !Sub 'https://${SubDomain}.${DomainName}'
+      - !Sub 'https://${CloudFrontDistribution.DomainName}'
+
+  CustomDomainName:
+    Condition: HasCustomDomain
+    Description: Custom domain name
+    Value: !Sub '${SubDomain}.${DomainName}'
+    Export:
+      Name: !Sub '${AWS::StackName}-CustomDomainName'
+
+  SSLCertificateArn:
+    Condition: HasCustomDomain
+    Description: SSL Certificate ARN
+    Value: !Ref SSLCertificate
+    Export:
+      Name: !Sub '${AWS::StackName}-SSLCertificateArn'

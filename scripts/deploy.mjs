@@ -66,24 +66,49 @@ function deployInfrastructure() {
 
   const samConfigExists = existsSync(join(projectRoot, 'samconfig.toml'));
 
+  // Build parameter overrides from environment variables
+  const parameterOverrides = buildParameterOverrides();
+
   if (samConfigExists) {
     log('📋 Using existing samconfig.toml...');
     if (isCI) {
-      execCommand('sam deploy --no-confirm-changeset');
+      const overrideFlag = parameterOverrides ? `--parameter-overrides "${parameterOverrides}"` : '';
+      execCommand(`sam deploy --no-confirm-changeset ${overrideFlag}`);
     } else {
-      execCommand('sam deploy');
+      const overrideFlag = parameterOverrides ? `--parameter-overrides "${parameterOverrides}"` : '';
+      execCommand(`sam deploy ${overrideFlag}`);
     }
   } else {
     if (isCI) {
       log('📋 No samconfig.toml found, using defaults for CI...');
       const stackName = 'obs-reactions';
       const region = 'us-west-2';
-      execCommand(`sam deploy --stack-name ${stackName} --region ${region} --capabilities CAPABILITY_IAM --no-confirm-changeset --no-fail-on-empty-changeset`);
+      const overrideFlag = parameterOverrides ? `--parameter-overrides "${parameterOverrides}"` : '';
+      execCommand(`sam deploy --stack-name ${stackName} --region ${region} --capabilities CAPABILITY_IAM --no-confirm-changeset --no-fail-on-empty-changeset ${overrideFlag}`);
     } else {
       log('📋 No samconfig.toml found, running guided setup...');
       execCommand('sam deploy --guided');
     }
   }
+}
+
+function buildParameterOverrides() {
+  const overrides = [];
+
+  // Add DNS parameters if they exist in environment
+  if (process.env.DNS_HOSTED_ZONE_ID) {
+    overrides.push(`HostedZoneId=${process.env.DNS_HOSTED_ZONE_ID}`);
+  }
+
+  if (process.env.DNS_DOMAIN_NAME) {
+    overrides.push(`DomainName=${process.env.DNS_DOMAIN_NAME}`);
+  }
+
+  if (process.env.DNS_SUBDOMAIN) {
+    overrides.push(`SubDomain=${process.env.DNS_SUBDOMAIN}`);
+  }
+
+  return overrides.length > 0 ? overrides.join(' ') : null;
 }
 
 function getStackName() {
@@ -225,12 +250,16 @@ async function main() {
     const bucketName = outputs.WebsiteBucketName;
     const distributionId = outputs.CloudFrontDistributionId;
     const websiteUrl = outputs.WebsiteURL;
+    const customDomain = outputs.CustomDomainName;
 
     uploadToS3(bucketName);
     invalidateCloudFront(distributionId);
 
     log('✅ Deployment completed successfully!');
     log(`🌐 Website URL: ${websiteUrl}`);
+    if (customDomain) {
+      log(`🔗 Custom Domain: https://${customDomain}`);
+    }
     log(`📊 CloudFront Distribution ID: ${distributionId}`);
     log(`🪣 S3 Bucket: ${bucketName}`);
 
