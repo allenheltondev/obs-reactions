@@ -119,7 +119,7 @@ function getRegion() {
     }
   }
 
-  return 'us-east-1';
+  return 'us-west-2';
 }
 
 function getProfile() {
