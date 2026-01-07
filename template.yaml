@@ -2,32 +2,10 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: 'OBS Reactions - React app deployed to S3 and CloudFront'
 
-Parameters:
-  Environment:
-    Type: String
-    Default: prod
-    AllowedValues: [dev, staging, prod]
-    Description: Environment name
-
-  DomainName:
-    Type: String
-    Default: ''
-    Description: Custom domain name (optional)
-
-  CertificateArn:
-    Type: String
-    Default: ''
-    Description: ACM certificate ARN for custom domain (optional)
-
-Conditions:
-  HasCustomDomain: !Not [!Equals [!Ref DomainName, '']]
-  HasCertificate: !Not [!Equals [!Ref CertificateArn, '']]
-
 Resources:
   WebsiteBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub '${AWS::StackName}-website-${Environment}-${AWS::AccountId}'
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
@@ -53,16 +31,8 @@ Resources:
     Type: AWS::CloudFront::Distribution
     Properties:
       DistributionConfig:
-        Aliases: !If
-          - HasCustomDomain
-          - [!Ref DomainName]
-          - !Ref AWS::NoValue
-        ViewerCertificate: !If
-          - HasCertificate
-          - AcmCertificateArn: !Ref CertificateArn
-            SslSupportMethod: sni-only
-            MinimumProtocolVersion: TLSv1.2_2021
-          - CloudFrontDefaultCertificate: true
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: true
         Origins:
           - Id: S3Origin
             DomainName: !GetAtt WebsiteBucket.RegionalDomainName
@@ -87,7 +57,6 @@ Resources:
         PriceClass: PriceClass_100
         Comment: !Sub 'CloudFront distribution for ${AWS::StackName}'
 
-  # Bucket Policy to allow CloudFront access
   BucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
@@ -104,8 +73,6 @@ Resources:
             Condition:
               StringEquals:
                 'AWS:SourceArn': !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}'
-
-
 
 Outputs:
   WebsiteBucketName:
@@ -128,7 +95,4 @@ Outputs:
 
   WebsiteURL:
     Description: Website URL
-    Value: !If
-      - HasCustomDomain
-      - !Sub 'https://${DomainName}'
-      - !Sub 'https://${CloudFrontDistribution.DomainName}'
+    Value: !Sub 'https://${CloudFrontDistribution.DomainName}'
