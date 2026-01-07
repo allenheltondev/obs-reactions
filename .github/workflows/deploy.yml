@@ -25,6 +25,16 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
+    - name: Create environment file
+      run: |
+        echo "VITE_MOMENTO_API_KEY=${{ secrets.MOMENTO_API_KEY }}" >> .env
+        echo "VITE_MOMENTO_TOPICS_URL=${{ vars.MOMENTO_TOPICS_URL }}" >> .env
+        echo "VITE_MOMENTO_CACHE_NAME=${{ vars.MOMENTO_CACHE_NAME }}" >> .env
+        echo "VITE_EVENT_NAME=${{ vars.EVENT_NAME || 'Live Event' }}" >> .env
+        echo "VITE_PRIMARY_COLOR=${{ vars.PRIMARY_COLOR || '#15381F' }}" >> .env
+        echo "VITE_SECONDARY_COLOR=${{ vars.SECONDARY_COLOR || '#05C88C' }}" >> .env
+        echo "VITE_TERTIARY_COLOR=${{ vars.TERTIARY_COLOR || '#C4F135' }}" >> .env
+
     - name: Build project
       run: npm run build
 
