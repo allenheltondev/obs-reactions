@@ -1,0 +1,76 @@
+/* Animated Emoji CSS Module */
+
+.animatedEmoji {
+  position: absolute;
+  font-size: 2rem;
+  pointer-events: none;
+  z-index: 200;
+  animation: floatUp 3.5s ease-out forwards, spin 3.5s linear forwards;
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+@keyframes floatUp {
+  0% {
+    bottom: 0;
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  25% {
+    opacity: 1;
+    transform: translateY(-25vh) scale(1.1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: translateY(-50vh) scale(1.05);
+  }
+  75% {
+    opacity: 0.6;
+    transform: translateY(-75vh) scale(0.95);
+  }
+  100% {
+    bottom: 100vh;
+    opacity: 0;
+    transform: translateY(-100vh) scale(0.8);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(var(--rotation));
+  }
+}
+
+@media (max-width: 768px) {
+  .animatedEmoji {
+    font-size: 1.75rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .animatedEmoji {
+    font-size: 2.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animatedEmoji {
+    animation: floatUpReduced 3.5s linear forwards;
+  }
+
+  @keyframes floatUpReduced {
+    0% {
+      bottom: 0;
+      opacity: 1;
+    }
+    100% {
+      bottom: 100vh;
+      opacity: 0;
+    }
+  }
+}
