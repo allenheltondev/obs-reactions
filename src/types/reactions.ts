@@ -17,7 +17,7 @@ export interface EmojiMapping {
 }
 
 export const EMOJI_MAP = {
-  'heart': '♥️',
+  'heart': '💚',
   '100': '💯',
   'thumbsup': '👍',
   'clap': '👏',
